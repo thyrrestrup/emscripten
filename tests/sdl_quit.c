@@ -18,9 +18,8 @@ void one() {
   while (SDL_PollEvent(&event)) {
     switch(event.type) {
       case SDL_QUIT: {
-        if (!result) { // prevent infinite recursion since REPORT_RESULT does window.close too.
-          result = 1;
-          REPORT_RESULT_SYNC(1);
+        if (!result) { // prevent infinite recursion since test exit does window.close too.
+          emscripten_force_exit(0);
         }
       }
     }
@@ -37,4 +36,3 @@ int main() {
   // (actual window.close won't work as the test will be done inside an iframe)
   emscripten_run_script("setTimeout(function() { window.dispatchEvent(new Event('unload')) }, 2000)");
 }
-
