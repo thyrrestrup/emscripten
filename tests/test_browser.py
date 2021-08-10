@@ -627,14 +627,6 @@ If manually bisecting:
           <center><canvas id='canvas' width='256' height='256'></canvas></center>
           <hr><div id='output'></div><hr>
           <script type='text/javascript'>
-            window.onerror = function(error) {
-              window.onerror = null;
-              var result = error.indexOf("test.data") >= 0 ? 1 : 0;
-              var xhr = new XMLHttpRequest();
-              xhr.open('GET', 'http://localhost:8888/report_result?' + result, true);
-              xhr.send();
-              setTimeout(function() { window.close() }, 1000);
-            }
             var Module = {
               locateFile: function (path, prefix) {if (path.endsWith(".wasm")) {return prefix + path;} else {return "''' + assetLocalization + r'''" + path;}},
               print: (function() {
@@ -653,17 +645,17 @@ If manually bisecting:
       setup("")
       self.compile_btest(['main.cpp', '--shell-file', 'on_window_error_shell.html', '--preload-file', 'data.txt', '-o', 'test.html'])
       shutil.move('test.data', 'missing.data')
-      self.run_browser('test.html', '', '/report_result?1')
+      self.run_browser('test.html', '', ['/report_result?exception:', 'test.data'], assert_all=True)
 
       # test unknown protocol should go through xhr.onerror
       setup("unknown_protocol://")
       self.compile_btest(['main.cpp', '--shell-file', 'on_window_error_shell.html', '--preload-file', 'data.txt', '-o', 'test.html'])
-      self.run_browser('test.html', '', '/report_result?1')
+      self.run_browser('test.html', '', ['/report_result?exception:', 'test.data'], assert_all=True)
 
       # test wrong protocol and port
       setup("https://localhost:8800/")
       self.compile_btest(['main.cpp', '--shell-file', 'on_window_error_shell.html', '--preload-file', 'data.txt', '-o', 'test.html'])
-      self.run_browser('test.html', '', '/report_result?1')
+      self.run_browser('test.html', '', ['/report_result?exception:', 'test.data'], assert_all=True)
 
     test()
 
@@ -4978,10 +4970,10 @@ window.close = function() {
     self.btest(test_file('emscripten_console_log.c'), '0', args=['--pre-js', test_file('emscripten_console_log_pre.js')])
 
   def test_emscripten_throw_number(self):
-    self.btest(test_file('emscripten_throw_number.c'), '0', args=['--pre-js', test_file('emscripten_throw_number_pre.js')])
+    self.btest(test_file('emscripten_throw_number.c'), 'exception:Uncaught 42');
 
   def test_emscripten_throw_string(self):
-    self.btest(test_file('emscripten_throw_string.c'), '0', args=['--pre-js', test_file('emscripten_throw_string_pre.js')])
+    self.btest(test_file('emscripten_throw_string.c'), 'exception:Uncaught Hello!')
 
   # Tests that Closure run in combination with -s ENVIRONMENT=web mode works with a minimal console.log() application
   def test_closure_in_web_only_target_environment_console_log(self):
