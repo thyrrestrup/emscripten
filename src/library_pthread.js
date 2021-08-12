@@ -147,7 +147,7 @@ var LibraryPThread = {
       Atomics.store(HEAPU32, (tb + {{{ C_STRUCTS.pthread.cancelasync }}} ) >> 2, 0/*PTHREAD_CANCEL_DEFERRED*/);
       PThread.runExitHandlers();
 
-      Atomics.store(HEAPU32, (tb + {{{ C_STRUCTS.pthread.threadExitCode }}} ) >> 2, exitCode);
+      Atomics.store(HEAPU32, (tb + {{{ C_STRUCTS.pthread.result }}} ) >> 2, exitCode);
       // When we publish this, the main thread is free to deallocate the thread object and we are done.
       // Therefore set _pthread_self = 0; above to 'release' the object in this worker thread.
       Atomics.store(HEAPU32, (tb + {{{ C_STRUCTS.pthread.threadStatus }}} ) >> 2, 1); // Mark the thread as no longer running.
@@ -871,8 +871,8 @@ var LibraryPThread = {
     for (;;) {
       var threadStatus = Atomics.load(HEAPU32, (thread + {{{ C_STRUCTS.pthread.threadStatus }}} ) >> 2);
       if (threadStatus == 1) { // Exited?
-        var threadExitCode = Atomics.load(HEAPU32, (thread + {{{ C_STRUCTS.pthread.threadExitCode }}} ) >> 2);
-        if (status) {{{ makeSetValue('status', 0, 'threadExitCode', 'i32') }}};
+        var result = Atomics.load(HEAPU32, (thread + {{{ C_STRUCTS.pthread.result }}} ) >> 2);
+        if (status) {{{ makeSetValue('status', 0, 'result', 'i32') }}};
         Atomics.store(HEAPU32, (thread + {{{ C_STRUCTS.pthread.detached }}} ) >> 2, 1); // Mark the thread as detached.
 
         if (!ENVIRONMENT_IS_PTHREAD) cleanupThread(thread);
