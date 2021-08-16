@@ -143,8 +143,9 @@ mergeInto(LibraryManager.library, {
           Fibers.trampoline();
         }
         if (Asyncify.afterUnwind) {
-          Asyncify.afterUnwind();
+          var callback = Asyncify.afterUnwind;
           Asyncify.afterUnwind = null;
+          callback();
         }
       }
     },
